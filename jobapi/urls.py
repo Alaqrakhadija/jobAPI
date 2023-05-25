@@ -21,7 +21,9 @@ import job
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('jobAPI/', include('job.urls')),
-    path('api-auth/', include('rest_framework.urls')),
+    path('job-api/', include('job.urls')),
+
+    # path('api-auth/', include('rest_framework.urls')),
+
 
 ]

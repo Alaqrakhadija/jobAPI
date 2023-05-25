@@ -17,6 +17,12 @@ class PositionHyperlink(serializers.HyperlinkedRelatedField):
         return reverse(view_name, kwargs=url_kwargs, request=request, format=format)
 
 
+class CompanyPositionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Position
+        fields = ['id', 'title']
+
+
 class PositionSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     company = serializers.ReadOnlyField(source='company.id')
@@ -38,11 +44,12 @@ class PositionSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-    positions = PositionHyperlink(many=True)
+    # positions = PositionHyperlink(many=True)
+    positions = CompanyPositionSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'bio', 'address', 'phone_number', 'type', 'positions']
+        fields = ['id', 'username', 'bio', 'address', 'email', 'phone_number', 'type', 'positions']
 
     # def get_fields(self, *args, **kwargs):
     #     fields = super().get_fields(*args, **kwargs)

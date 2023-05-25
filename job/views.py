@@ -1,14 +1,14 @@
-from rest_framework import viewsets, permissions, filters, mixins
+from rest_framework import viewsets, permissions, filters, mixins, authentication
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
-from rest_framework.response import Response
 from django_filters import rest_framework
 from job.chatgpt import generate_response
 from job.filters import PositionFilter
 from job.models import Position, User, Type
 from job.permissions import IsCompanyOrReadOnly, IsOwnerOrReadOnly
 
-from job.serialize import PositionSerializer, UserSerializer
+from job.serialize import PositionSerializer, UserSerializer, CompanyPositionSerializer
+from rest_framework.response import Response
 
 
 class CompanyPositionViewSet(mixins.CreateModelMixin,
@@ -19,8 +19,15 @@ class CompanyPositionViewSet(mixins.CreateModelMixin,
     filter_backends = [filters.SearchFilter, rest_framework.DjangoFilterBackend]
     search_fields = ['title']
     filterset_class = PositionFilter
+    authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated,
                           IsCompanyOrReadOnly, IsOwnerOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            if self.action == 'list':
+                return CompanyPositionSerializer
+
 
     def get_queryset(self):
         company_id = self.kwargs['pk']
@@ -38,6 +45,7 @@ class CompanyPositionViewSet(mixins.CreateModelMixin,
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
+    authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
